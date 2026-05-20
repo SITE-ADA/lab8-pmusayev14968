@@ -90,13 +90,15 @@ public class CourseService {
                 .courseId(courseId)
                 .studentId(studentId)
                 .build();
+
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
 
         return new EnrollmentResponseDto(
                 savedEnrollment.getId(),
                 savedEnrollment.getCourseId(),
                 savedEnrollment.getStudentId(),
-                "Student enrolled successfully."
+                "Student enrolled successfully.",
+                savedEnrollment.getEnrollmentDate()
         );
     }
 
