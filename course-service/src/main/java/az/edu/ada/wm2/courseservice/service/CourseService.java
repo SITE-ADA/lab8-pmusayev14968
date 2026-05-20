@@ -1,10 +1,7 @@
 package az.edu.ada.wm2.courseservice.service;
 
 import az.edu.ada.wm2.courseservice.client.StudentFeignClient;
-import az.edu.ada.wm2.courseservice.exception.CourseNotFoundException;
-import az.edu.ada.wm2.courseservice.exception.EnrollmentAlreadyExistsException;
-import az.edu.ada.wm2.courseservice.exception.RemoteStudentNotFoundException;
-import az.edu.ada.wm2.courseservice.exception.StudentServiceCommunicationException;
+import az.edu.ada.wm2.courseservice.exception.*;
 import az.edu.ada.wm2.courseservice.model.dto.CourseRequestDto;
 import az.edu.ada.wm2.courseservice.model.dto.CourseResponseDto;
 import az.edu.ada.wm2.courseservice.model.dto.CourseStudentsResponseDto;
@@ -38,13 +35,24 @@ public class CourseService {
     private String studentServiceBaseUrl;
 
     public CourseResponseDto createCourse(CourseRequestDto requestDto) {
+
+        Course prerequisiteCourse = null;
+
+        if (requestDto.getPrerequisiteId() != null) {
+            prerequisiteCourse = findCourseOrThrow(requestDto.getPrerequisiteId());
+        }
+
         Course course = Course.builder()
                 .title(requestDto.getTitle())
                 .code(requestDto.getCode())
                 .credits(requestDto.getCredits())
+                .prerequisiteId(
+                        prerequisiteCourse != null ? prerequisiteCourse.getId() : null
+                )
                 .build();
 
         Course savedCourse = courseRepository.save(course);
+
         return toCourseResponseDto(savedCourse);
     }
 
@@ -77,14 +85,19 @@ public class CourseService {
     }
 
     public EnrollmentResponseDto enrollStudent(Long courseId, Long studentId) {
+
         log.debug("Enrolling student {} into course {}", studentId, courseId);
-        findCourseOrThrow(courseId);
+
+        Course course = findCourseOrThrow(courseId);
 
         if (enrollmentRepository.existsByCourseIdAndStudentId(courseId, studentId)) {
             throw new EnrollmentAlreadyExistsException(courseId, studentId);
         }
 
         validateStudentWithFeign(studentId);
+
+        // prerequisite validation
+        validatePrerequisite(studentId, course);
 
         Enrollment enrollment = Enrollment.builder()
                 .courseId(courseId)
@@ -101,6 +114,7 @@ public class CourseService {
                 savedEnrollment.getEnrollmentDate()
         );
     }
+
 
     public CourseStudentsResponseDto getCourseStudents(Long courseId) {
         log.debug("Fetching students for course {}", courseId);
@@ -153,5 +167,25 @@ public class CourseService {
                 course.getCode(),
                 course.getCredits()
         );
+    }
+
+    private void validatePrerequisite(Long studentId, Course course) {
+
+        if (course.getPrerequisiteId() == null) {
+            return;
+        }
+
+        boolean completedPrerequisite =
+                enrollmentRepository.existsByCourseIdAndStudentId(
+                        course.getPrerequisiteId(),
+                        studentId
+                );
+
+        if (!completedPrerequisite) {
+            throw new PrerequisiteNotSatisfiedException(
+                    course.getPrerequisiteId(),
+                    course.getId()
+            );
+        }
     }
 }
