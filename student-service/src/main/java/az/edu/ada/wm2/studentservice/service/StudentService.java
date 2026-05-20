@@ -70,4 +70,16 @@ public class StudentService {
                 student.getAge()
         );
     }
+
+    public List<StudentResponseDto> searchStudentsByName(String name) {
+
+        return studentRepository
+                .findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
+                        name,
+                        name
+                )
+                .stream()
+                .map(this::toResponseDto)
+                .toList();
+    }
 }

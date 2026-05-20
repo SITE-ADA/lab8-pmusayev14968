@@ -2,11 +2,7 @@ package az.edu.ada.wm2.courseservice.service;
 
 import az.edu.ada.wm2.courseservice.client.StudentFeignClient;
 import az.edu.ada.wm2.courseservice.exception.*;
-import az.edu.ada.wm2.courseservice.model.dto.CourseRequestDto;
-import az.edu.ada.wm2.courseservice.model.dto.CourseResponseDto;
-import az.edu.ada.wm2.courseservice.model.dto.CourseStudentsResponseDto;
-import az.edu.ada.wm2.courseservice.model.dto.EnrollmentResponseDto;
-import az.edu.ada.wm2.courseservice.model.dto.StudentDto;
+import az.edu.ada.wm2.courseservice.model.dto.*;
 import az.edu.ada.wm2.courseservice.model.entity.Course;
 import az.edu.ada.wm2.courseservice.model.entity.Enrollment;
 import az.edu.ada.wm2.courseservice.repository.CourseRepository;
@@ -132,6 +128,38 @@ public class CourseService {
         return new CourseStudentsResponseDto(course.getId(), course.getTitle(), students);
     }
 
+    public List<StudentCoursesResponseDto> getCoursesByStudentName(String name) {
+
+        log.debug("Searching courses by student name {}", name);
+
+        List<StudentDto> students =
+                studentFeignClient.searchStudentsByName(name);
+
+        return students.stream()
+                .map(student -> {
+
+                    List<CourseResponseDto> courses =
+                            enrollmentRepository
+                                    .findByStudentId(student.getId())
+                                    .stream()
+                                    .map(enrollment ->
+                                            findCourseOrThrow(
+                                                    enrollment.getCourseId()
+                                            )
+                                    )
+                                    .map(this::toCourseResponseDto)
+                                    .toList();
+
+                    return new StudentCoursesResponseDto(
+                            student.getId(),
+                            student.getFirstName(),
+                            student.getLastName(),
+                            courses
+                    );
+                })
+                .toList();
+    }
+
     private void validateStudentWithFeign(Long studentId) {
         try {
             log.debug("Validating student {} via Feign", studentId);
@@ -165,7 +193,8 @@ public class CourseService {
                 course.getId(),
                 course.getTitle(),
                 course.getCode(),
-                course.getCredits()
+                course.getCredits(),
+                course.getPrerequisiteId()
         );
     }
 
