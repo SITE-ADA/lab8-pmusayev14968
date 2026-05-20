@@ -13,22 +13,36 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Tələbə yaratmaq və ya yeniləmək üçün istifadə olunan məlumatlar")
 public class StudentRequestDto {
 
-    @Schema(description = "Student first name", example = "Nicat")
-    @NotBlank(message = "First name is required")
+    @Schema(
+            description = "Tələbənin adı",
+            example = "Nicat"
+    )
+    @NotBlank(message = "Ad boş ola bilməz")
     private String firstName;
 
-    @Schema(description = "Student last name", example = "Aliyev")
-    @NotBlank(message = "Last name is required")
+    @Schema(
+            description = "Tələbənin soyadı",
+            example = "Əliyev"
+    )
+    @NotBlank(message = "Soyad boş ola bilməz")
     private String lastName;
 
-    @Schema(description = "Student email address", example = "nicat.aliyev@example.com")
-    @NotBlank(message = "Email is required")
-    @Email(message = "Email format is invalid")
+    @Schema(
+            description = "Tələbənin e-mail ünvanı",
+            example = "nicat.aliyev@example.com"
+    )
+    @NotBlank(message = "Email boş ola bilməz")
+    @Email(message = "Email formatı düzgün deyil")
     private String email;
 
-    @Schema(description = "Student age", example = "20", minimum = "16")
-    @Min(value = 16, message = "Age must be at least 16")
+    @Schema(
+            description = "Tələbənin yaşı (minimum 16)",
+            example = "20",
+            minimum = "16"
+    )
+    @Min(value = 16, message = "Yaş ən az 16 olmalıdır")
     private Integer age;
 }

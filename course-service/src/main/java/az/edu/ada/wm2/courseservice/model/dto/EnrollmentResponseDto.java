@@ -12,19 +12,36 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Tələbənin kursa qeydiyyat cavabı")
 public class EnrollmentResponseDto {
 
-    @Schema(description = "Enrollment id", example = "10")
+    @Schema(
+            description = "Qeydiyyatın unikal identifikatoru",
+            example = "10"
+    )
     private Long enrollmentId;
 
-    @Schema(description = "Course id", example = "1")
+    @Schema(
+            description = "Kursun ID-si",
+            example = "1"
+    )
     private Long courseId;
 
-    @Schema(description = "Student id", example = "15")
+    @Schema(
+            description = "Tələbənin ID-si",
+            example = "15"
+    )
     private Long studentId;
 
-    @Schema(description = "Operation result message", example = "Student enrolled successfully.")
+    @Schema(
+            description = "Əməliyyat nəticəsi mesajı",
+            example = "Tələbə uğurla kursa qeydiyyatdan keçdi"
+    )
     private String message;
 
-    LocalDateTime enrollmentDate;
+    @Schema(
+            description = "Qeydiyyat tarixi və vaxtı",
+            example = "2026-05-20T12:30:00"
+    )
+    private LocalDateTime enrollmentDate;
 }

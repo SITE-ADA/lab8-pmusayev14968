@@ -12,19 +12,33 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Kurs yaratmaq və ya yeniləmək üçün istifadə olunan məlumatlar")
 public class CourseRequestDto {
 
-    @Schema(description = "Course title", example = "Data Structures")
-    @NotBlank(message = "Title is required")
+    @Schema(
+            description = "Kursun adı",
+            example = "Data Structures"
+    )
+    @NotBlank(message = "Ad boş ola bilməz")
     private String title;
 
-    @Schema(description = "Course code", example = "CS201")
-    @NotBlank(message = "Code is required")
+    @Schema(
+            description = "Kurs kodu",
+            example = "CS201"
+    )
+    @NotBlank(message = "Kod boş ola bilməz")
     private String code;
 
-    @Schema(description = "Credit count", example = "4")
-    @Positive(message = "Credits must be positive")
+    @Schema(
+            description = "Kredit sayı",
+            example = "4"
+    )
+    @Positive(message = "Kredit müsbət olmalıdır")
     private Integer credits;
 
+    @Schema(
+            description = "Prerequisite kursun ID-si (opsional, null ola bilər)",
+            example = "1"
+    )
     private Long prerequisiteId;
 }
